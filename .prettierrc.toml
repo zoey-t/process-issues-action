@@ -5,3 +5,4 @@ quoteProps = "as-needed"
 trailingComma = "none"
 arrowParens = "avoid"
 bracketSpacing = false
+singleQuote = true
