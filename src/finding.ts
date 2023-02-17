@@ -138,7 +138,7 @@ export async function process_issue(configs: IConfigs): Promise<void> {
 		let doc_issue: IDocMD
 
 		// create file
-		const fullPath = path.join(`${title}.md`)
+		const fullPath = path.join(`${title.trim()}.md`)
 		const dirName = path.dirname(fullPath)
 		fs.rmSync(dirName, {recursive: true, force: true})
 		mkdirp.sync(dirName)
