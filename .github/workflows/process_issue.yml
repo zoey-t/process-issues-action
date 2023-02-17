@@ -10,10 +10,10 @@ jobs:
     steps:
       - uses: actions/checkout@v3
         with:
-          token: ${{secrets.ACCESS_TOKEN}}
+          token: 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
       - uses: ./
         with:
-          token: ${{secrets.ACCESS_TOKEN}}
+          token: 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
           publish-label: 'good'
       - uses: stefanzweifel/git-auto-commit-action@v4
         with:
