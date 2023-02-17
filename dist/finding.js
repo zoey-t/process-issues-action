@@ -38,6 +38,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.batch_processing_finding_issues = exports.process_issue = exports.process_finding_issue = void 0;
 const core = __importStar(require("@actions/core"));
 const github = __importStar(require("@actions/github"));
+// import * as glob from 'glob'
 const path_1 = __importDefault(require("path"));
 const fs_1 = __importDefault(require("fs"));
 const mkdirp_1 = require("mkdirp");
@@ -214,6 +215,8 @@ exports.process_issue = process_issue;
 function batch_processing_finding_issues(configs) {
     return __awaiter(this, void 0, void 0, function* () {
         core.info(`batch processing all open issues with label '${configs.publishLabel}' at ${configs.srcRepo.owner}/${configs.srcRepo.repo}}`);
+        // clean all existing files
+        deleteMDs(path_1.default.dirname(''));
         const res = {};
         const octokit = github.getOctokit(configs.token);
         const issues = yield octokit.rest.issues.listForRepo({
@@ -333,3 +336,13 @@ function batch_processing_finding_issues(configs) {
     });
 }
 exports.batch_processing_finding_issues = batch_processing_finding_issues;
+// clean all md files in root folder
+function deleteMDs(dirPath) {
+    const files = fs_1.default.readdirSync(dirPath);
+    const reg = new RegExp('^.*.(md)$');
+    for (const file of files) {
+        if (reg.test(file)) {
+            fs_1.default.rmSync(file);
+        }
+    }
+}
