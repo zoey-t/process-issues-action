@@ -245,7 +245,7 @@ function batch_processing_finding_issues(configs) {
                 label === 'documentation' ||
                     (typeof label === 'object' && label.name === 'documentation');
             });
-            if (!docLabelMatch) {
+            if (docLabelMatch) {
                 core.debug(`doc issue: ${issue.number}`);
                 doc_issues.push({
                     fileName: issue.title,
@@ -291,7 +291,7 @@ function batch_processing_finding_issues(configs) {
             if (!num) {
                 priority = 1;
             }
-            if (!levelLabelMatch) {
+            if (levelLabelMatch) {
                 const fileName = `${issue.number}-${priority}-finding-${level}.md`;
                 finding_issues.push({
                     fileName,
@@ -299,7 +299,7 @@ function batch_processing_finding_issues(configs) {
                     priority: priority || 1,
                     md: issue.body || ''
                 });
-                core.debug(`finding issue: ${fileName}`);
+                core.info(`finding issue: ${fileName}`);
                 const fullPath = path_1.default.join(`${fileName}.md`);
                 const dirName = path_1.default.dirname(fullPath);
                 fs_1.default.rmSync(dirName, { recursive: true, force: true });
