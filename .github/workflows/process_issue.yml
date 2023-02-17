@@ -1,0 +1,21 @@
+on:
+  issues:
+    types:
+      - labeled
+      - edited
+    
+jobs:
+  process_issues:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          token: ${{secrets.ACCESS_TOKEN}}
+          publish-label: 'good'
+          
+      - uses: ./
+        with:
+          token: ${{secrets.ACCESS_TOKEN}}
+      - uses: stefanzweifel/git-auto-commit-action@v4
+        with:
+          commit_message: 'docs: update markdown from gh issue'

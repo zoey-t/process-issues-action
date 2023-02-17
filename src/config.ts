@@ -34,7 +34,7 @@ export interface IConfigs {
 	 * true: batch processing all the issues with publish label
 	 * false: processing a single issue
 	 */
-	bacth: boolean
+	batch: boolean
 }
 
 export interface IFindingMD {
