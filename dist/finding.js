@@ -229,12 +229,19 @@ function batch_processing_finding_issues(configs) {
             owner: configs.srcRepo.owner,
             repo: configs.srcRepo.repo,
             state: 'open',
-            labels: `${configs.publishLabel}` && `documentatiion`
+            labels: `documentatiion`
         });
+        core.info(`${docs.data.length} doc issues`);
         if (docs) {
             for (const issue of docs.data) {
                 core.debug(`processing issue ${issue.number}`);
                 // If it's a doc issue
+                // check if it has publishlabel
+                const publishLabelMatch = issue.labels.find(label => label === configs.publishLabel ||
+                    (typeof label === 'object' && label.name === configs.publishLabel));
+                if (!publishLabelMatch) {
+                    continue;
+                }
                 const docLabelMatch = issue.labels.find(label => {
                     label === 'documentation' ||
                         (typeof label === 'object' && label.name === 'documentation');
@@ -309,7 +316,7 @@ function batch_processing_finding_issues(configs) {
                     md: issue.body || ''
                 });
                 core.info(`finding issue: ${fileName}`);
-                const fullPath = path_1.default.join(`${fileName}.md`);
+                const fullPath = path_1.default.join(`${fileName}`);
                 const dirName = path_1.default.dirname(fullPath);
                 fs_1.default.rmSync(dirName, { recursive: true, force: true });
                 mkdirp_1.mkdirp.sync(dirName);
