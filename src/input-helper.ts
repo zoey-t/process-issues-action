@@ -17,7 +17,7 @@ export async function getInputs(): Promise<IConfigs> {
 	}
 
 	// source repo
-	let srcRepo = core.getInput('src-repo') || `${owner}/${repo}`
+	const srcRepo = core.getInput('src-repo') || `${owner}/${repo}`
 	core.debug(`src-repo = ${srcRepo}`)
 	let splitRepository = srcRepo.split('/')
 	if (
@@ -31,7 +31,7 @@ export async function getInputs(): Promise<IConfigs> {
 	}
 	res.srcRepo = {owner: splitRepository[0], repo: splitRepository[1]}
 	// target repo
-	let targetRepo = core.getInput('target-repo') || `${owner}/${repo}`
+	const targetRepo = core.getInput('target-repo') || `${owner}/${repo}`
 	core.debug(`target-repo = ${targetRepo}`)
 	splitRepository = targetRepo.split('/')
 	if (

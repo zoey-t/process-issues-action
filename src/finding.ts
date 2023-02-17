@@ -86,39 +86,39 @@ export async function process_finding_issue(
 
 	// create file
 	const fullPath = path.join(res.fileName)
-	const dirName= path.dirname(fullPath)
-	fs.rmSync(dirName, {recursive:true, force:true})
+	const dirName = path.dirname(fullPath)
+	fs.rmSync(dirName, {recursive: true, force: true})
 	mkdirp.sync(dirName)
-	fs.writeFileSync(fullPath,res.md)
+	fs.writeFileSync(fullPath, res.md)
 	return res
 }
 
 export async function batch_processing_finding_issues(
 	configs: IConfigs
 ): Promise<IFindingMD[]> {
-	core.info(`batch processing all open issues with label '${configs.publishLabel}'`)
+	core.info(
+		`batch processing all open issues with label '${configs.publishLabel}'`
+	)
 	const res = {} as unknown as IFindingMD[]
 	const octokit = github.getOctokit(configs.token)
 	const issues = await octokit.rest.issues.listForRepo({
 		owner: configs.srcRepo.owner,
 		repo: configs.srcRepo.repo,
 		state: 'open',
-		labels:`${configs.publishLabel}`
+		labels: `${configs.publishLabel}`
 	})
 	// findings
-	let finding_issues:IFindingMD[] = []
-	let doc_issues: IDocMD[] = [] 
-	for (let issue of issues.data) {
+	const finding_issues: IFindingMD[] = []
+	const doc_issues: IDocMD[] = []
+	for (const issue of issues.data) {
 		core.debug(`processing issue ${issue.number}`)
 
 		// If it's a doc issue
 
-		const docLabelMatch = issue.labels.find(
-			label => {
-				label === 'documentation' ||
+		const docLabelMatch = issue.labels.find(label => {
+			label === 'documentation' ||
 				(typeof label === 'object' && label.name === 'documentation')
-			}
-		)
+		})
 		if (!docLabelMatch) {
 			core.debug(`doc issue: ${issue.number}`)
 			doc_issues.push({
@@ -128,23 +128,25 @@ export async function batch_processing_finding_issues(
 
 			// create file
 			const fullPath = path.join(doc_issues.at(-1)!.fileName)
-			const dirName= path.dirname(fullPath)
-			fs.rmSync(dirName, {recursive:true, force:true})
+			const dirName = path.dirname(fullPath)
+			fs.rmSync(dirName, {recursive: true, force: true})
 			mkdirp.sync(dirName)
-			fs.writeFileSync(fullPath,issue.body)
+			// fs.writeFileSync(fullPath,issue.body)
 			//TODO: to current repo instead of target repo
 			// octokit.rest.
 			continue
 		}
 
 		// if it's a finding issue
-		
+
 		const levelLabelMatch = issue.labels.find(label => {
 			// if label is a string
-			if ((Object.values(FindingLevel) as string[]).includes(label.toString())) {
+			if (
+				(Object.values(FindingLevel) as string[]).includes(label.toString())
+			) {
 				return true
 			}
-	
+
 			// if labels is an object
 			if (
 				typeof label === 'object' &&
@@ -154,7 +156,7 @@ export async function batch_processing_finding_issues(
 			}
 		})
 
-		let priority;
+		let priority
 		const priorityLabel = issue.labels.find(label => {
 			Number(label) || (typeof label === 'object' && Number(label.name))
 		})
@@ -164,9 +166,11 @@ export async function batch_processing_finding_issues(
 		} else {
 			priority = num
 		}
-		if(!levelLabelMatch) {
+		if (!levelLabelMatch) {
 			finding_issues.push({
-				fileName: `${issue.number}-${priority}-finding-${levelLabelMatch?.toString()!}`,
+				fileName: `${
+					issue.number
+				}-${priority}-finding-${levelLabelMatch?.toString()!}`,
 				level: levelLabelMatch?.toString()!,
 				priority: 0,
 				md: issue.body || ''
@@ -174,10 +178,7 @@ export async function batch_processing_finding_issues(
 
 			core.debug(`finding issue: ${finding_issues.at(-1)}`)
 		}
-
 	}
-
-	
 
 	// const doc_issues = await octokit.rest.issues.listForRepo({
 	// 	owner: configs.srcRepo.owner,
