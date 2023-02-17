@@ -68,12 +68,21 @@ export async function process_finding_issue(
 		throw new Error(`issue does not contain level label`)
 	}
 
+	let num: number = 1;
 	core.debug(`issue level ${res.level}`)
 
 	const priorityLabel = labels.find(label => {
-		Number(label) || (typeof label === 'object' && Number(label.name))
+		if(Number(label)) {
+			num = Number(label)
+			return true
+		}
+		if(typeof label === 'object' && Number(label.name)) {
+			num = Number(label.name!)
+			return true
+		}
+		
 	})
-	const num = Number(priorityLabel)
+
 	if (!num) {
 		res.priority = 1
 	} else {
@@ -81,8 +90,7 @@ export async function process_finding_issue(
 	}
 
 	res.priority = Number(priorityLabel)
-
-	res.fileName = `${issueNum}-${res.priority}-finding-${res.level}`
+	res.fileName = `${issueNum}-${res.priority}-finding-${res.level}.md`
 	res.md = issue.body || ''
 
 	// create file
