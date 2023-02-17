@@ -217,6 +217,9 @@ function batch_processing_finding_issues(configs) {
             state: 'open',
             labels: `${configs.publishLabel}`
         });
+        if (!issues) {
+            throw new Error(`no matched issues!`);
+        }
         // findings
         const finding_issues = [];
         const doc_issues = [];

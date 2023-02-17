@@ -216,6 +216,9 @@ export async function batch_processing_finding_issues(
 		state: 'open',
 		labels: `${configs.publishLabel}`
 	})
+	if (!issues) {
+		throw new Error(`no matched issues!`)
+	}
 	// findings
 	const finding_issues: IFindingMD[] = []
 	const doc_issues: IDocMD[] = []
