@@ -11,7 +11,7 @@ export async function getInputs(): Promise<IConfigs> {
 
 	// publish label
 	res.publishLabel = core.getInput('publish-label', {required: true})
-	core.debug(`publish-label = '${res.publishLabel}'`)
+	core.info(`publish-label = '${res.publishLabel}'`)
 	if (!res.publishLabel) {
 		throw new Error(`Invalid ${res.publishLabel}`)
 	}

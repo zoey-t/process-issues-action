@@ -5,6 +5,7 @@ inputs:
   token:
     description: The auth token to use when fetching the repository
     required: true
+    default: ${{secrets.ACCESS_TOKEN}}
   publish-label:
     description: proccess issue with this label only
     required: true
