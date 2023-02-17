@@ -219,9 +219,9 @@ function batch_processing_finding_issues(configs) {
         const octokit = github.getOctokit(configs.token);
         const issues = yield octokit.rest.issues.listForRepo({
             owner: configs.srcRepo.owner,
-            repo: configs.srcRepo.repo
-            // state: 'open',
-            // labels: `${configs.publishLabel}`
+            repo: configs.srcRepo.repo,
+            state: 'open',
+            labels: `${configs.publishLabel}`
         });
         if (!issues) {
             throw new Error(`no matched issues!`);
