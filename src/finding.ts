@@ -206,7 +206,7 @@ export async function batch_processing_finding_issues(
 	configs: IConfigs
 ): Promise<IFindingMD[]> {
 	core.info(
-		`batch processing all open issues with label '${configs.publishLabel}'`
+		`batch processing all open issues with label '${configs.publishLabel}' at ${configs.srcRepo.owner}/${configs.srcRepo.repo}}`
 	)
 	const res = {} as unknown as IFindingMD[]
 	const octokit = github.getOctokit(configs.token)
