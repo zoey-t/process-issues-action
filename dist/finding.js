@@ -138,6 +138,12 @@ function process_issue(configs) {
         // get labels
         const { data: { labels, title, body } } = response;
         core.debug(`processing issue ${issue.number}`);
+        // check if it has publishlabel
+        const publishLabelMatch = labels.find(label => label === configs.publishLabel ||
+            (typeof label === 'object' && label.name === configs.publishLabel));
+        if (!publishLabelMatch) {
+            throw new Error(`issue does not contain publish label '${configs.publishLabel}'`);
+        }
         // If it's a doc issue
         const docLabelMatch = labels.find(label => {
             label === 'documentation' ||
@@ -213,9 +219,9 @@ function batch_processing_finding_issues(configs) {
         const octokit = github.getOctokit(configs.token);
         const issues = yield octokit.rest.issues.listForRepo({
             owner: configs.srcRepo.owner,
-            repo: configs.srcRepo.repo,
-            state: 'open',
-            labels: `${configs.publishLabel}`
+            repo: configs.srcRepo.repo
+            // state: 'open',
+            // labels: `${configs.publishLabel}`
         });
         if (!issues) {
             throw new Error(`no matched issues!`);
@@ -224,6 +230,16 @@ function batch_processing_finding_issues(configs) {
         const finding_issues = [];
         const doc_issues = [];
         for (const issue of issues.data) {
+            // open issue only
+            if (issue.state !== 'open') {
+                continue;
+            }
+            // check if it has publishlabel
+            const publishLabelMatch = issue.labels.find(label => label === configs.publishLabel ||
+                (typeof label === 'object' && label.name === configs.publishLabel));
+            if (!publishLabelMatch) {
+                continue;
+            }
             core.debug(`processing issue ${issue.number}`);
             // If it's a doc issue
             const docLabelMatch = issue.labels.find(label => {
