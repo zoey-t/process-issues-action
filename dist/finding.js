@@ -235,7 +235,7 @@ function batch_processing_finding_issues(configs) {
             const docLabelMatch = issue.labels.find(label => label === 'documentation' ||
                 (typeof label === 'object' && label.name === 'documentation'));
             if (docLabelMatch) {
-                core.debug(`doc issue: ${issue.number}`);
+                core.info(`doc issue: ${issue.number}`);
                 const fileName = issue.title;
                 // doc_issues.push({
                 // 	fileName: issue.title,
