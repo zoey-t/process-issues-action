@@ -10,7 +10,7 @@ export async function getInputs(): Promise<IConfigs> {
 	res.token = core.getInput('token', {required: true})
 
 	// publish label
-	res.publishLabel = core.getInput('label', {required: true})
+	res.publishLabel = core.getInput('publish-label', {required: true})
 	core.debug(`publish-label = '${res.publishLabel}'`)
 	if (!res.publishLabel) {
 		throw new Error(`Invalid ${res.publishLabel}`)
