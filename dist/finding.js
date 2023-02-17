@@ -212,7 +212,6 @@ function process_issue(configs) {
 }
 exports.process_issue = process_issue;
 function batch_processing_finding_issues(configs) {
-    var _a;
     return __awaiter(this, void 0, void 0, function* () {
         core.info(`batch processing all open issues with label '${configs.publishLabel}' at ${configs.srcRepo.owner}/${configs.srcRepo.repo}}`);
         const res = {};
@@ -293,14 +292,15 @@ function batch_processing_finding_issues(configs) {
                 priority = 1;
             }
             if (!levelLabelMatch) {
+                const fileName = `${issue.number}-${priority}-finding-${level}.md`;
                 finding_issues.push({
-                    fileName: `${issue.number}-${priority}-finding-${level}.md`,
-                    level: levelLabelMatch === null || levelLabelMatch === void 0 ? void 0 : levelLabelMatch.toString(),
-                    priority: 0,
+                    fileName,
+                    level: level,
+                    priority: priority || 1,
                     md: issue.body || ''
                 });
-                core.debug(`finding issue: ${finding_issues.at(-1)}`);
-                const fullPath = path_1.default.join(`${(_a = finding_issues.at(-1)) === null || _a === void 0 ? void 0 : _a.fileName}.md`);
+                core.debug(`finding issue: ${fileName}`);
+                const fullPath = path_1.default.join(`${fileName}.md`);
                 const dirName = path_1.default.dirname(fullPath);
                 fs_1.default.rmSync(dirName, { recursive: true, force: true });
                 mkdirp_1.mkdirp.sync(dirName);

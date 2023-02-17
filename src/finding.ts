@@ -314,15 +314,16 @@ export async function batch_processing_finding_issues(
 			priority = 1
 		}
 		if (!levelLabelMatch) {
+			const fileName = `${issue.number}-${priority}-finding-${level}.md`
 			finding_issues.push({
-				fileName: `${issue.number}-${priority}-finding-${level}.md`,
-				level: levelLabelMatch?.toString()!,
-				priority: 0,
+				fileName,
+				level: level as unknown as string,
+				priority: priority || 1,
 				md: issue.body || ''
 			})
 
-			core.debug(`finding issue: ${finding_issues.at(-1)}`)
-			const fullPath = path.join(`${finding_issues.at(-1)?.fileName}.md`)
+			core.debug(`finding issue: ${fileName}`)
+			const fullPath = path.join(`${fileName}.md`)
 			const dirName = path.dirname(fullPath)
 			fs.rmSync(dirName, {recursive: true, force: true})
 			mkdirp.sync(dirName)
