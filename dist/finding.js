@@ -216,7 +216,7 @@ function batch_processing_finding_issues(configs) {
     return __awaiter(this, void 0, void 0, function* () {
         core.info(`batch processing all open issues with label '${configs.publishLabel}' at ${configs.srcRepo.owner}/${configs.srcRepo.repo}}`);
         // clean all existing files
-        deleteMDs(path_1.default.dirname(''));
+        // deleteMDs(path.dirname(''))
         const res = {};
         const octokit = github.getOctokit(configs.token);
         const issues = yield octokit.rest.issues.listForRepo({

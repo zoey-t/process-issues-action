@@ -224,7 +224,7 @@ export async function batch_processing_finding_issues(
 	)
 
 	// clean all existing files
-	deleteMDs(path.dirname(''))
+	// deleteMDs(path.dirname(''))
 
 	const res = {} as unknown as IFindingMD[]
 	const octokit = github.getOctokit(configs.token)
