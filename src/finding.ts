@@ -226,8 +226,8 @@ export async function batch_processing_finding_issues(
 	const issues = await octokit.rest.issues.listForRepo({
 		owner: configs.srcRepo.owner,
 		repo: configs.srcRepo.repo,
-		// state: 'open',
-		// labels: `${configs.publishLabel}`
+		state: 'open',
+		labels: `${configs.publishLabel}`
 	})
 	if (!issues) {
 		throw new Error(`no matched issues!`)
