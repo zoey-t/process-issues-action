@@ -6,7 +6,7 @@ import {process_finding_issue} from './finding'
 async function run(): Promise<void> {
 	try {
 		const configs = await getInputs()
-		process_finding_issue(configs)
+		await process_finding_issue(configs)
 	} catch (error) {
 		if (error instanceof Error) core.setFailed(error.message)
 	}
