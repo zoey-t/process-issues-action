@@ -49,7 +49,7 @@ function getInputs() {
         }
         // source repo
         const srcRepo = core.getInput('src-repo') || `${owner}/${repo}`;
-        core.debug(`src-repo = ${srcRepo}`);
+        core.info(`src-repo = ${srcRepo}`);
         let splitRepository = srcRepo.split('/');
         if (splitRepository.length !== 2 ||
             !splitRepository[0] ||
@@ -59,7 +59,7 @@ function getInputs() {
         res.srcRepo = { owner: splitRepository[0], repo: splitRepository[1] };
         // target repo
         const targetRepo = core.getInput('target-repo') || `${owner}/${repo}`;
-        core.debug(`target-repo = ${targetRepo}`);
+        core.info(`target-repo = ${targetRepo}`);
         splitRepository = targetRepo.split('/');
         if (splitRepository.length !== 2 ||
             !splitRepository[0] ||
@@ -69,7 +69,9 @@ function getInputs() {
         res.targetRepo = { owner: splitRepository[0], repo: splitRepository[1] };
         // is this a finding issue
         res.finding = (core.getInput('finding') || 'true') === 'true';
+        core.info(`finding issue?: true`);
         res.batch = (core.getInput('batch') || 'true') === 'true';
+        core.info(`batch?: true`);
         return res;
     });
 }

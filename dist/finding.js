@@ -87,7 +87,7 @@ function process_finding_issue(configs) {
             throw new Error(`issue does not contain level label`);
         }
         let num = 1;
-        core.debug(`issue level ${res.level}`);
+        core.info(`issue level ${res.level}`);
         const priorityLabel = labels.find(label => {
             if (Number(label)) {
                 num = Number(label);
@@ -104,8 +104,9 @@ function process_finding_issue(configs) {
         else {
             res.priority = num;
         }
-        res.priority = Number(priorityLabel);
+        core.info(`priority: ${res.priority}`);
         res.fileName = `${issueNum}-${res.priority}-finding-${res.level}.md`;
+        core.info(`md file: ${res.fileName}`);
         res.md = issue.body || '';
         // create file
         const fullPath = path_1.default.join(res.fileName);
