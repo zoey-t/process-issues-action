@@ -73,23 +73,31 @@ function process_finding_issue(configs) {
         const levelLabelMatch = labels.find(label => {
             // if label is a string
             if (Object.values(config_1.FindingLevel).includes(label.toString())) {
+                res.level = label.toString();
                 return true;
             }
             // if labels is an object
             if (typeof label === 'object' &&
                 Object.values(config_1.FindingLevel).includes(label.name)) {
+                res.level = label.name;
                 return true;
             }
         });
         if (!levelLabelMatch) {
             throw new Error(`issue does not contain level label`);
         }
-        res.level = levelLabelMatch.toString();
+        let num = 1;
         core.debug(`issue level ${res.level}`);
         const priorityLabel = labels.find(label => {
-            Number(label) || (typeof label === 'object' && Number(label.name));
+            if (Number(label)) {
+                num = Number(label);
+                return true;
+            }
+            if (typeof label === 'object' && Number(label.name)) {
+                num = Number(label.name);
+                return true;
+            }
         });
-        const num = Number(priorityLabel);
         if (!num) {
             res.priority = 1;
         }
@@ -97,7 +105,7 @@ function process_finding_issue(configs) {
             res.priority = num;
         }
         res.priority = Number(priorityLabel);
-        res.fileName = `${issueNum}-${res.priority}-finding-${res.level}`;
+        res.fileName = `${issueNum}-${res.priority}-finding-${res.level}.md`;
         res.md = issue.body || '';
         // create file
         const fullPath = path_1.default.join(res.fileName);

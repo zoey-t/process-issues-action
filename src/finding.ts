@@ -50,7 +50,7 @@ export async function process_finding_issue(
 	const levelLabelMatch = labels.find(label => {
 		// if label is a string
 		if ((Object.values(FindingLevel) as string[]).includes(label.toString())) {
-			res.level= label.toString()
+			res.level = label.toString()
 			return true
 		}
 
@@ -59,7 +59,7 @@ export async function process_finding_issue(
 			typeof label === 'object' &&
 			(Object.values(FindingLevel) as string[]).includes(label.name!)
 		) {
-			res.level= label.name!
+			res.level = label.name!
 			return true
 		}
 	})
@@ -68,19 +68,18 @@ export async function process_finding_issue(
 		throw new Error(`issue does not contain level label`)
 	}
 
-	let num: number = 1;
+	let num: number = 1
 	core.debug(`issue level ${res.level}`)
 
 	const priorityLabel = labels.find(label => {
-		if(Number(label)) {
+		if (Number(label)) {
 			num = Number(label)
 			return true
 		}
-		if(typeof label === 'object' && Number(label.name)) {
+		if (typeof label === 'object' && Number(label.name)) {
 			num = Number(label.name!)
 			return true
 		}
-		
 	})
 
 	if (!num) {
