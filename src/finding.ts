@@ -333,7 +333,7 @@ export async function batch_processing_finding_issues(
 			})
 
 			core.info(`finding issue: ${fileName}`)
-			const fullPath = path.join(`${fileName}.md`)
+			const fullPath = path.join(`${fileName}`)
 			const dirName = path.dirname(fullPath)
 			fs.rmSync(dirName, {recursive: true, force: true})
 			mkdirp.sync(dirName)
