@@ -69,7 +69,7 @@ export async function process_finding_issue(
 	}
 
 	let num: number = 1
-	core.debug(`issue level ${res.level}`)
+	core.info(`issue level ${res.level}`)
 
 	const priorityLabel = labels.find(label => {
 		if (Number(label)) {
@@ -88,7 +88,10 @@ export async function process_finding_issue(
 		res.priority = num
 	}
 
+	core.info(`priority: ${res.priority}`)
+
 	res.fileName = `${issueNum}-${res.priority}-finding-${res.level}.md`
+	core.info(`md file: ${res.fileName}`)
 	res.md = issue.body || ''
 
 	// create file
