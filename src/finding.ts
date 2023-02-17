@@ -1,9 +1,10 @@
 import * as core from '@actions/core'
 import * as github from '@actions/github'
+// import * as glob from 'glob'
 import path from 'path'
 import fs from 'fs'
 import {mkdirp} from 'mkdirp'
-import {FindingLevel, IConfigs, IDocMD, IFindingMD} from './config'
+import {FindingLevel, IConfigs, IFindingMD} from './config'
 
 // bc of issue trigger. src should be the same repo
 export async function process_finding_issue(
@@ -221,6 +222,10 @@ export async function batch_processing_finding_issues(
 	core.info(
 		`batch processing all open issues with label '${configs.publishLabel}' at ${configs.srcRepo.owner}/${configs.srcRepo.repo}}`
 	)
+
+	// clean all existing files
+	deleteMDs(path.dirname(''))
+
 	const res = {} as unknown as IFindingMD[]
 	const octokit = github.getOctokit(configs.token)
 	const issues = await octokit.rest.issues.listForRepo({
@@ -360,4 +365,15 @@ export async function batch_processing_finding_issues(
 	// })
 
 	return res
+}
+
+// clean all md files in root folder
+function deleteMDs(dirPath: string): void {
+	const files = fs.readdirSync(dirPath)
+	const reg = new RegExp('^.*.(md)$')
+	for (const file of files) {
+		if (reg.test(file)) {
+			fs.rmSync(file)
+		}
+	}
 }
