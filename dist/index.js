@@ -10023,6 +10023,7 @@ const path_1 = __importDefault(__nccwpck_require__(1017));
 const fs_1 = __importDefault(__nccwpck_require__(7147));
 const mkdirp_1 = __nccwpck_require__(8975);
 const config_1 = __nccwpck_require__(6373);
+// bc of issue trigger. src should be the same repo
 function process_finding_issue(configs) {
     return __awaiter(this, void 0, void 0, function* () {
         // if(configs.finding != true) {
@@ -10125,9 +10126,8 @@ function process_issue(configs) {
         });
         if (!docLabelMatch) {
             core.debug(`doc issue: ${issue.number}`);
-            let doc_issue;
             // create file
-            const fullPath = path_1.default.join(`${title}.md`);
+            const fullPath = path_1.default.join(`${title.trim()}.md`);
             const dirName = path_1.default.dirname(fullPath);
             fs_1.default.rmSync(dirName, { recursive: true, force: true });
             mkdirp_1.mkdirp.sync(dirName);
@@ -10167,7 +10167,7 @@ function process_issue(configs) {
             priority = 1;
         }
         if (!levelLabelMatch) {
-            let fileName = `${issueNum}-${priority}-finding-${level}.md`;
+            const fileName = `${issueNum}-${priority}-finding-${level}.md`;
             // finding_issues.push({
             // 	fileName: `${
             // 		issue.number
@@ -10187,6 +10187,7 @@ function process_issue(configs) {
 }
 exports.process_issue = process_issue;
 function batch_processing_finding_issues(configs) {
+    var _a;
     return __awaiter(this, void 0, void 0, function* () {
         core.info(`batch processing all open issues with label '${configs.publishLabel}'`);
         const res = {};
@@ -10214,46 +10215,58 @@ function batch_processing_finding_issues(configs) {
                     md: issue.body || ''
                 });
                 // create file
-                const fullPath = path_1.default.join(doc_issues.at(-1).fileName);
+                const fullPath = path_1.default.join(`${doc_issues.at(-1).fileName.trim()}.md`);
                 const dirName = path_1.default.dirname(fullPath);
                 fs_1.default.rmSync(dirName, { recursive: true, force: true });
                 mkdirp_1.mkdirp.sync(dirName);
-                // fs.writeFileSync(fullPath,issue.body)
-                //TODO: to current repo instead of target repo
+                fs_1.default.writeFileSync(fullPath, issue.body || '');
+                //TODO: currently only write to current repo. not supporting write a targeting repo
                 // octokit.rest.
                 continue;
             }
             // if it's a finding issue
+            let level;
             const levelLabelMatch = issue.labels.find(label => {
                 // if label is a string
                 if (Object.values(config_1.FindingLevel).includes(label.toString())) {
+                    level = label.toString();
                     return true;
                 }
                 // if labels is an object
                 if (typeof label === 'object' &&
                     Object.values(config_1.FindingLevel).includes(label.name)) {
+                    level = label.name;
                     return true;
                 }
             });
             let priority;
             const priorityLabel = issue.labels.find(label => {
-                Number(label) || (typeof label === 'object' && Number(label.name));
+                if (Number(label)) {
+                    priority = Number(label);
+                    return true;
+                }
+                if (typeof label === 'object' && Number(label.name)) {
+                    priority = Number(label.name);
+                    return true;
+                }
             });
             const num = Number(priorityLabel);
             if (!num) {
                 priority = 1;
             }
-            else {
-                priority = num;
-            }
             if (!levelLabelMatch) {
                 finding_issues.push({
-                    fileName: `${issue.number}-${priority}-finding-${levelLabelMatch === null || levelLabelMatch === void 0 ? void 0 : levelLabelMatch.toString()}`,
+                    fileName: `${issue.number}-${priority}-finding-${level}.md`,
                     level: levelLabelMatch === null || levelLabelMatch === void 0 ? void 0 : levelLabelMatch.toString(),
                     priority: 0,
                     md: issue.body || ''
                 });
                 core.debug(`finding issue: ${finding_issues.at(-1)}`);
+                const fullPath = path_1.default.join(`${(_a = finding_issues.at(-1)) === null || _a === void 0 ? void 0 : _a.fileName}.md`);
+                const dirName = path_1.default.dirname(fullPath);
+                fs_1.default.rmSync(dirName, { recursive: true, force: true });
+                mkdirp_1.mkdirp.sync(dirName);
+                fs_1.default.writeFileSync(fullPath, issue.body || '');
             }
         }
         // const doc_issues = await octokit.rest.issues.listForRepo({
@@ -10402,7 +10415,12 @@ function run() {
     return __awaiter(this, void 0, void 0, function* () {
         try {
             const configs = yield (0, input_helper_1.getInputs)();
-            const issue_md = yield (0, finding_1.process_issue)(configs);
+            if (configs.batch === true) {
+                yield (0, finding_1.batch_processing_finding_issues)(configs);
+            }
+            else {
+                yield (0, finding_1.process_issue)(configs);
+            }
             // core.info(`file name ${finding_md.fileName}`)
             // core.debug(`${finding_md.md}`)
         }

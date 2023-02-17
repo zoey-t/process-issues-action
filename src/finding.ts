@@ -5,6 +5,7 @@ import fs from 'fs'
 import {mkdirp} from 'mkdirp'
 import {FindingLevel, IConfigs, IDocMD, IFindingMD} from './config'
 
+// bc of issue trigger. src should be the same repo
 export async function process_finding_issue(
 	configs: IConfigs
 ): Promise<IFindingMD> {
@@ -68,7 +69,7 @@ export async function process_finding_issue(
 		throw new Error(`issue does not contain level label`)
 	}
 
-	let num: number = 1
+	let num = 1
 	core.info(`issue level ${res.level}`)
 
 	const priorityLabel = labels.find(label => {
@@ -135,7 +136,6 @@ export async function process_issue(configs: IConfigs): Promise<void> {
 	})
 	if (!docLabelMatch) {
 		core.debug(`doc issue: ${issue.number}`)
-		let doc_issue: IDocMD
 
 		// create file
 		const fullPath = path.join(`${title.trim()}.md`)
@@ -183,7 +183,7 @@ export async function process_issue(configs: IConfigs): Promise<void> {
 		priority = 1
 	}
 	if (!levelLabelMatch) {
-		let fileName = `${issueNum}-${priority}-finding-${level}.md`
+		const fileName = `${issueNum}-${priority}-finding-${level}.md`
 		// finding_issues.push({
 		// 	fileName: `${
 		// 		issue.number
@@ -236,23 +236,24 @@ export async function batch_processing_finding_issues(
 			})
 
 			// create file
-			const fullPath = path.join(doc_issues.at(-1)!.fileName)
+			const fullPath = path.join(`${doc_issues.at(-1)!.fileName.trim()}.md`)
 			const dirName = path.dirname(fullPath)
 			fs.rmSync(dirName, {recursive: true, force: true})
 			mkdirp.sync(dirName)
-			// fs.writeFileSync(fullPath,issue.body)
-			//TODO: to current repo instead of target repo
+			fs.writeFileSync(fullPath, issue.body || '')
+			//TODO: currently only write to current repo. not supporting write a targeting repo
 			// octokit.rest.
 			continue
 		}
 
 		// if it's a finding issue
-
+		let level
 		const levelLabelMatch = issue.labels.find(label => {
 			// if label is a string
 			if (
 				(Object.values(FindingLevel) as string[]).includes(label.toString())
 			) {
+				level = label.toString()
 				return true
 			}
 
@@ -261,31 +262,40 @@ export async function batch_processing_finding_issues(
 				typeof label === 'object' &&
 				(Object.values(FindingLevel) as string[]).includes(label.name!)
 			) {
+				level = label.name!
 				return true
 			}
 		})
 
 		let priority
 		const priorityLabel = issue.labels.find(label => {
-			Number(label) || (typeof label === 'object' && Number(label.name))
+			if (Number(label)) {
+				priority = Number(label)
+				return true
+			}
+			if (typeof label === 'object' && Number(label.name)) {
+				priority = Number(label.name!)
+				return true
+			}
 		})
 		const num = Number(priorityLabel)
 		if (!num) {
 			priority = 1
-		} else {
-			priority = num
 		}
 		if (!levelLabelMatch) {
 			finding_issues.push({
-				fileName: `${
-					issue.number
-				}-${priority}-finding-${levelLabelMatch?.toString()!}`,
+				fileName: `${issue.number}-${priority}-finding-${level}.md`,
 				level: levelLabelMatch?.toString()!,
 				priority: 0,
 				md: issue.body || ''
 			})
 
 			core.debug(`finding issue: ${finding_issues.at(-1)}`)
+			const fullPath = path.join(`${finding_issues.at(-1)?.fileName}.md`)
+			const dirName = path.dirname(fullPath)
+			fs.rmSync(dirName, {recursive: true, force: true})
+			mkdirp.sync(dirName)
+			fs.writeFileSync(fullPath, issue.body || '')
 		}
 	}
 
