@@ -42,7 +42,7 @@ function getInputs() {
         // token
         res.token = core.getInput('token', { required: true });
         // publish label
-        res.publishLabel = core.getInput('label', { required: true });
+        res.publishLabel = core.getInput('publish-label', { required: true });
         core.debug(`publish-label = '${res.publishLabel}'`);
         if (!res.publishLabel) {
             throw new Error(`Invalid ${res.publishLabel}`);
@@ -69,7 +69,7 @@ function getInputs() {
         res.targetRepo = { owner: splitRepository[0], repo: splitRepository[1] };
         // is this a finding issue
         res.finding = (core.getInput('finding') || 'true') === 'true';
-        res.bacth = (core.getInput('batch') || 'true') === 'true';
+        res.batch = (core.getInput('batch') || 'true') === 'true';
         return res;
     });
 }

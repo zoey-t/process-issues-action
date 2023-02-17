@@ -48,7 +48,7 @@ export async function getInputs(): Promise<IConfigs> {
 	// is this a finding issue
 	res.finding = (core.getInput('finding') || 'true') === 'true'
 
-	res.bacth = (core.getInput('batch') || 'true') === 'true'
+	res.batch = (core.getInput('batch') || 'true') === 'true'
 
 	return res
 }
