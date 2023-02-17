@@ -232,9 +232,44 @@ export async function batch_processing_finding_issues(
 	if (!issues) {
 		throw new Error(`no matched issues!`)
 	}
-	// findings
+
+	const docs = await octokit.rest.issues.listForRepo({
+		owner: configs.srcRepo.owner,
+		repo: configs.srcRepo.repo,
+		state: 'open',
+		labels: `${configs.publishLabel}` && `documentatiion`
+	})
+	if (docs) {
+		for (const issue of docs.data) {
+			core.debug(`processing issue ${issue.number}`)
+
+			// If it's a doc issue
+
+			const docLabelMatch = issue.labels.find(label => {
+				label === 'documentation' ||
+					(typeof label === 'object' && label.name === 'documentation')
+			})
+			if (docLabelMatch) {
+				core.debug(`doc issue: ${issue.number}`)
+				const fileName = issue.title
+				// doc_issues.push({
+				// 	fileName: issue.title,
+				// 	md: issue.body || ''
+				// })
+
+				// create file
+				const fullPath = path.join(`${fileName.trim()}.md`)
+				const dirName = path.dirname(fullPath)
+				fs.rmSync(dirName, {recursive: true, force: true})
+				mkdirp.sync(dirName)
+				fs.writeFileSync(fullPath, issue.body || '')
+				//TODO: currently only write to current repo. not supporting write a targeting repo
+				// octokit.rest.
+			}
+		}
+	}
+
 	const finding_issues: IFindingMD[] = []
-	const doc_issues: IDocMD[] = []
 	for (const issue of issues.data) {
 		// open issue only
 		if (issue.state !== 'open') {
@@ -252,31 +287,6 @@ export async function batch_processing_finding_issues(
 		}
 
 		core.debug(`processing issue ${issue.number}`)
-
-		// If it's a doc issue
-
-		const docLabelMatch = issue.labels.find(label => {
-			label === 'documentation' ||
-				(typeof label === 'object' && label.name === 'documentation')
-		})
-		if (docLabelMatch) {
-			core.debug(`doc issue: ${issue.number}`)
-			doc_issues.push({
-				fileName: issue.title,
-				md: issue.body || ''
-			})
-
-			// create file
-			const fullPath = path.join(`${doc_issues.at(-1)!.fileName.trim()}.md`)
-			const dirName = path.dirname(fullPath)
-			fs.rmSync(dirName, {recursive: true, force: true})
-			mkdirp.sync(dirName)
-			fs.writeFileSync(fullPath, issue.body || '')
-			//TODO: currently only write to current repo. not supporting write a targeting repo
-			// octokit.rest.
-			continue
-		}
-
 		// if it's a finding issue
 		let level
 		const levelLabelMatch = issue.labels.find(label => {

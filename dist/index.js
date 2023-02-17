@@ -10193,23 +10193,52 @@ function process_issue(configs) {
 }
 exports.process_issue = process_issue;
 function batch_processing_finding_issues(configs) {
-    var _a;
     return __awaiter(this, void 0, void 0, function* () {
         core.info(`batch processing all open issues with label '${configs.publishLabel}' at ${configs.srcRepo.owner}/${configs.srcRepo.repo}}`);
         const res = {};
         const octokit = github.getOctokit(configs.token);
         const issues = yield octokit.rest.issues.listForRepo({
             owner: configs.srcRepo.owner,
-            repo: configs.srcRepo.repo
-            // state: 'open',
-            // labels: `${configs.publishLabel}`
+            repo: configs.srcRepo.repo,
+            state: 'open',
+            labels: `${configs.publishLabel}`
         });
         if (!issues) {
             throw new Error(`no matched issues!`);
         }
-        // findings
+        const docs = yield octokit.rest.issues.listForRepo({
+            owner: configs.srcRepo.owner,
+            repo: configs.srcRepo.repo,
+            state: 'open',
+            labels: `${configs.publishLabel}` && `documentatiion`
+        });
+        if (docs) {
+            for (const issue of docs.data) {
+                core.debug(`processing issue ${issue.number}`);
+                // If it's a doc issue
+                const docLabelMatch = issue.labels.find(label => {
+                    label === 'documentation' ||
+                        (typeof label === 'object' && label.name === 'documentation');
+                });
+                if (docLabelMatch) {
+                    core.debug(`doc issue: ${issue.number}`);
+                    const fileName = issue.title;
+                    // doc_issues.push({
+                    // 	fileName: issue.title,
+                    // 	md: issue.body || ''
+                    // })
+                    // create file
+                    const fullPath = path_1.default.join(`${fileName.trim()}.md`);
+                    const dirName = path_1.default.dirname(fullPath);
+                    fs_1.default.rmSync(dirName, { recursive: true, force: true });
+                    mkdirp_1.mkdirp.sync(dirName);
+                    fs_1.default.writeFileSync(fullPath, issue.body || '');
+                    //TODO: currently only write to current repo. not supporting write a targeting repo
+                    // octokit.rest.
+                }
+            }
+        }
         const finding_issues = [];
-        const doc_issues = [];
         for (const issue of issues.data) {
             // open issue only
             if (issue.state !== 'open') {
@@ -10222,27 +10251,6 @@ function batch_processing_finding_issues(configs) {
                 continue;
             }
             core.debug(`processing issue ${issue.number}`);
-            // If it's a doc issue
-            const docLabelMatch = issue.labels.find(label => {
-                label === 'documentation' ||
-                    (typeof label === 'object' && label.name === 'documentation');
-            });
-            if (!docLabelMatch) {
-                core.debug(`doc issue: ${issue.number}`);
-                doc_issues.push({
-                    fileName: issue.title,
-                    md: issue.body || ''
-                });
-                // create file
-                const fullPath = path_1.default.join(`${doc_issues.at(-1).fileName.trim()}.md`);
-                const dirName = path_1.default.dirname(fullPath);
-                fs_1.default.rmSync(dirName, { recursive: true, force: true });
-                mkdirp_1.mkdirp.sync(dirName);
-                fs_1.default.writeFileSync(fullPath, issue.body || '');
-                //TODO: currently only write to current repo. not supporting write a targeting repo
-                // octokit.rest.
-                continue;
-            }
             // if it's a finding issue
             let level;
             const levelLabelMatch = issue.labels.find(label => {
@@ -10273,15 +10281,16 @@ function batch_processing_finding_issues(configs) {
             if (!num) {
                 priority = 1;
             }
-            if (!levelLabelMatch) {
+            if (levelLabelMatch) {
+                const fileName = `${issue.number}-${priority}-finding-${level}.md`;
                 finding_issues.push({
-                    fileName: `${issue.number}-${priority}-finding-${level}.md`,
-                    level: levelLabelMatch === null || levelLabelMatch === void 0 ? void 0 : levelLabelMatch.toString(),
-                    priority: 0,
+                    fileName,
+                    level: level,
+                    priority: priority || 1,
                     md: issue.body || ''
                 });
-                core.debug(`finding issue: ${finding_issues.at(-1)}`);
-                const fullPath = path_1.default.join(`${(_a = finding_issues.at(-1)) === null || _a === void 0 ? void 0 : _a.fileName}.md`);
+                core.info(`finding issue: ${fileName}`);
+                const fullPath = path_1.default.join(`${fileName}.md`);
                 const dirName = path_1.default.dirname(fullPath);
                 fs_1.default.rmSync(dirName, { recursive: true, force: true });
                 mkdirp_1.mkdirp.sync(dirName);
