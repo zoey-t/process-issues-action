@@ -239,6 +239,7 @@ export async function batch_processing_finding_issues(
 	}
 
 	for (const issue of issues.data) {
+		core.info(`processing ${issue.number}`)
 		// If it's a doc issue
 		// check if it has publishlabel
 		const docLabelMatch = issue.labels.find(
