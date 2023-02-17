@@ -232,7 +232,7 @@ function batch_processing_finding_issues(configs) {
             owner: configs.srcRepo.owner,
             repo: configs.srcRepo.repo,
             state: 'open',
-            labels: `documentatiion`
+            labels: `documentation`
         });
         core.info(`${docs.data.length} doc issues`);
         if (docs) {
