@@ -88,7 +88,6 @@ export async function process_finding_issue(
 		res.priority = num
 	}
 
-	res.priority = Number(priorityLabel)
 	res.fileName = `${issueNum}-${res.priority}-finding-${res.level}.md`
 	res.md = issue.body || ''
 
