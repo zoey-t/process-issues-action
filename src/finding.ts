@@ -259,7 +259,7 @@ export async function batch_processing_finding_issues(
 			label === 'documentation' ||
 				(typeof label === 'object' && label.name === 'documentation')
 		})
-		if (!docLabelMatch) {
+		if (docLabelMatch) {
 			core.debug(`doc issue: ${issue.number}`)
 			doc_issues.push({
 				fileName: issue.title,
@@ -313,7 +313,7 @@ export async function batch_processing_finding_issues(
 		if (!num) {
 			priority = 1
 		}
-		if (!levelLabelMatch) {
+		if (levelLabelMatch) {
 			const fileName = `${issue.number}-${priority}-finding-${level}.md`
 			finding_issues.push({
 				fileName,
@@ -322,7 +322,7 @@ export async function batch_processing_finding_issues(
 				md: issue.body || ''
 			})
 
-			core.debug(`finding issue: ${fileName}`)
+			core.info(`finding issue: ${fileName}`)
 			const fullPath = path.join(`${fileName}.md`)
 			const dirName = path.dirname(fullPath)
 			fs.rmSync(dirName, {recursive: true, force: true})
