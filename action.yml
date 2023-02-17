@@ -2,10 +2,26 @@ name: 'Your name here'
 description: 'Provide a description here'
 author: 'Your name or organization here'
 inputs:
-  milliseconds: # change this
+  token:
+    description: The auth token to use when fetching the repository
     required: true
-    description: 'input description here'
-    default: 'default value if applicable'
+  publish-label:
+    description: proccess issue with this label only
+    required: true
+  src-repo:
+    description: repo we fetch issues from
+    required: false
+  target-repo:
+    description: repo we output md files to
+    required: false
+  finding:
+    description: 'true: the issue is a finding issue otherwise false'
+    required: false
+    default: 'true'
+  batch:
+    description: 'true: batch processing all the issues with publish label. false: single issue only'
+    required: false
+    default: false
 runs:
   using: 'node16'
   main: 'dist/index.ts'

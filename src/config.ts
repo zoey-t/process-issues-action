@@ -24,7 +24,7 @@ export interface IConfigs {
 	targetRepo: IRepo
 
 	/**
-	 * is-finding: optional. default true
+	 * finding: optional. default true
 	 * true: the issue is a finding issue
 	 * false: the issue is a regular document issue
 	 */
