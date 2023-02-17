@@ -238,52 +238,80 @@ export async function batch_processing_finding_issues(
 		throw new Error(`no matched issues!`)
 	}
 
-	const docs = await octokit.rest.issues.listForRepo({
-		owner: configs.srcRepo.owner,
-		repo: configs.srcRepo.repo,
-		state: 'open',
-		labels: `documentation`
-	})
-	core.info(`${docs.data.length} doc issues`)
-	if (docs) {
-		for (const issue of docs.data) {
-			core.debug(`processing issue ${issue.number}`)
-
-			// If it's a doc issue
-			// check if it has publishlabel
-			const publishLabelMatch = issue.labels.find(
-				label =>
-					label === configs.publishLabel ||
-					(typeof label === 'object' && label.name === configs.publishLabel)
-			)
-
-			if (!publishLabelMatch) {
-				continue
-			}
-
-			const docLabelMatch = issue.labels.find(label => {
+	for (const issue of issues.data) {
+		// If it's a doc issue
+		// check if it has publishlabel
+		const docLabelMatch = issue.labels.find(
+			label =>
 				label === 'documentation' ||
-					(typeof label === 'object' && label.name === 'documentation')
-			})
-			if (docLabelMatch) {
-				core.debug(`doc issue: ${issue.number}`)
-				const fileName = issue.title
-				// doc_issues.push({
-				// 	fileName: issue.title,
-				// 	md: issue.body || ''
-				// })
+				(typeof label === 'object' && label.name === 'documentation')
+		)
 
-				// create file
-				const fullPath = path.join(`${fileName.trim()}.md`)
-				const dirName = path.dirname(fullPath)
-				fs.rmSync(dirName, {recursive: true, force: true})
-				mkdirp.sync(dirName)
-				fs.writeFileSync(fullPath, issue.body || '')
-				//TODO: currently only write to current repo. not supporting write a targeting repo
-				// octokit.rest.
-			}
+		if (!docLabelMatch) {
+			continue
 		}
+
+		core.debug(`doc issue: ${issue.number}`)
+		const fileName = issue.title
+		// doc_issues.push({
+		// 	fileName: issue.title,
+		// 	md: issue.body || ''
+		// })
+
+		// create file
+		const fullPath = path.join(`${fileName.trim()}.md`)
+		const dirName = path.dirname(fullPath)
+		fs.rmSync(dirName, {recursive: true, force: true})
+		mkdirp.sync(dirName)
+		fs.writeFileSync(fullPath, issue.body || '')
 	}
+
+	// const docs = await octokit.rest.issues.listForRepo({
+	// 	owner: configs.srcRepo.owner,
+	// 	repo: configs.srcRepo.repo,
+	// 	state: 'open',
+	// 	labels: `documentation`
+	// })
+	// core.info(`${docs.data.length} doc issues`)
+	// if (docs) {
+	// 	for (const issue of docs.data) {
+	// 		core.debug(`processing issue ${issue.number}`)
+
+	// 		// If it's a doc issue
+	// 		// check if it has publishlabel
+	// 		const publishLabelMatch = issue.labels.find(
+	// 			label =>
+	// 				label === configs.publishLabel ||
+	// 				(typeof label === 'object' && label.name === configs.publishLabel)
+	// 		)
+
+	// 		if (!publishLabelMatch) {
+	// 			continue
+	// 		}
+
+	// 		const docLabelMatch = issue.labels.find(label => {
+	// 			label === 'documentation' ||
+	// 				(typeof label === 'object' && label.name === 'documentation')
+	// 		})
+	// 		if (docLabelMatch) {
+	// 			core.debug(`doc issue: ${issue.number}`)
+	// 			const fileName = issue.title
+	// 			// doc_issues.push({
+	// 			// 	fileName: issue.title,
+	// 			// 	md: issue.body || ''
+	// 			// })
+
+	// 			// create file
+	// 			const fullPath = path.join(`${fileName.trim()}.md`)
+	// 			const dirName = path.dirname(fullPath)
+	// 			fs.rmSync(dirName, {recursive: true, force: true})
+	// 			mkdirp.sync(dirName)
+	// 			fs.writeFileSync(fullPath, issue.body || '')
+	// 			//TODO: currently only write to current repo. not supporting write a targeting repo
+	// 			// octokit.rest.
+	// 		}
+	// 	}
+	// }
 
 	const finding_issues: IFindingMD[] = []
 	for (const issue of issues.data) {
