@@ -225,7 +225,7 @@ export async function batch_processing_finding_issues(
 	const octokit = github.getOctokit(configs.token)
 	const issues = await octokit.rest.issues.listForRepo({
 		owner: configs.srcRepo.owner,
-		repo: configs.srcRepo.repo
+		repo: configs.srcRepo.repo,
 		// state: 'open',
 		// labels: `${configs.publishLabel}`
 	})

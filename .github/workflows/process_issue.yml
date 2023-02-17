@@ -16,7 +16,7 @@ jobs:
         with:
           token: ${{secrets.ACCESS_TOKEN}}
           publish-label: 'good'
-          src-repo: 'zoey-t/github-actions'
+          src-repo: 'zoey-t/fuel-src-20'
           batch: true
       - uses: stefanzweifel/git-auto-commit-action@v4
         with:
