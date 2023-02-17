@@ -16,6 +16,8 @@ jobs:
         with:
           token: ${{secrets.ACCESS_TOKEN}}
           publish-label: 'good'
+          src-repo: 'Verilog-Solutions/testci'
+          batch: true
       - uses: stefanzweifel/git-auto-commit-action@v4
         with:
           commit_message: 'docs: update markdown from gh issue'
