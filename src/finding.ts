@@ -247,23 +247,21 @@ export async function batch_processing_finding_issues(
 				(typeof label === 'object' && label.name === 'documentation')
 		)
 
-		if (!docLabelMatch) {
-			continue
+		if (docLabelMatch) {
+			core.debug(`doc issue: ${issue.number}`)
+			const fileName = issue.title
+			// doc_issues.push({
+			// 	fileName: issue.title,
+			// 	md: issue.body || ''
+			// })
+
+			// create file
+			const fullPath = path.join(`${fileName.trim()}.md`)
+			const dirName = path.dirname(fullPath)
+			fs.rmSync(dirName, {recursive: true, force: true})
+			mkdirp.sync(dirName)
+			fs.writeFileSync(fullPath, issue.body || '')
 		}
-
-		core.debug(`doc issue: ${issue.number}`)
-		const fileName = issue.title
-		// doc_issues.push({
-		// 	fileName: issue.title,
-		// 	md: issue.body || ''
-		// })
-
-		// create file
-		const fullPath = path.join(`${fileName.trim()}.md`)
-		const dirName = path.dirname(fullPath)
-		fs.rmSync(dirName, {recursive: true, force: true})
-		mkdirp.sync(dirName)
-		fs.writeFileSync(fullPath, issue.body || '')
 	}
 
 	// const docs = await octokit.rest.issues.listForRepo({

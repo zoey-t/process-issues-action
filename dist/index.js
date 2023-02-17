@@ -10214,21 +10214,20 @@ function batch_processing_finding_issues(configs) {
             // check if it has publishlabel
             const docLabelMatch = issue.labels.find(label => label === 'documentation' ||
                 (typeof label === 'object' && label.name === 'documentation'));
-            if (!docLabelMatch) {
-                continue;
+            if (docLabelMatch) {
+                core.debug(`doc issue: ${issue.number}`);
+                const fileName = issue.title;
+                // doc_issues.push({
+                // 	fileName: issue.title,
+                // 	md: issue.body || ''
+                // })
+                // create file
+                const fullPath = path_1.default.join(`${fileName.trim()}.md`);
+                const dirName = path_1.default.dirname(fullPath);
+                fs_1.default.rmSync(dirName, { recursive: true, force: true });
+                mkdirp_1.mkdirp.sync(dirName);
+                fs_1.default.writeFileSync(fullPath, issue.body || '');
             }
-            core.debug(`doc issue: ${issue.number}`);
-            const fileName = issue.title;
-            // doc_issues.push({
-            // 	fileName: issue.title,
-            // 	md: issue.body || ''
-            // })
-            // create file
-            const fullPath = path_1.default.join(`${fileName.trim()}.md`);
-            const dirName = path_1.default.dirname(fullPath);
-            fs_1.default.rmSync(dirName, { recursive: true, force: true });
-            mkdirp_1.mkdirp.sync(dirName);
-            fs_1.default.writeFileSync(fullPath, issue.body || '');
         }
         // const docs = await octokit.rest.issues.listForRepo({
         // 	owner: configs.srcRepo.owner,
