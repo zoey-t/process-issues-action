@@ -40,9 +40,9 @@ function run() {
     return __awaiter(this, void 0, void 0, function* () {
         try {
             const configs = yield (0, input_helper_1.getInputs)();
-            const finding_md = yield (0, finding_1.process_finding_issue)(configs);
-            core.info(`file name ${finding_md.fileName}`);
-            core.debug(`${finding_md.md}`);
+            const issue_md = yield (0, finding_1.process_issue)(configs);
+            // core.info(`file name ${finding_md.fileName}`)
+            // core.debug(`${finding_md.md}`)
         }
         catch (error) {
             if (error instanceof Error)

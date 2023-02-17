@@ -103,6 +103,105 @@ export async function process_finding_issue(
 	return res
 }
 
+export async function process_issue(configs: IConfigs): Promise<void> {
+	const octokit = github.getOctokit(configs.token)
+	const srcRepo = configs.srcRepo
+
+	const issue = github.context.payload.issue
+	if (!issue) {
+		throw new Error(`this action must be triggered by 'issue'`)
+	}
+
+	// issue number
+	const issueNum = issue.number
+	// fetch issue that triggered the action
+	const response = await octokit.rest.issues.get({
+		owner: srcRepo.owner,
+		repo: srcRepo.repo,
+		issue_number: issueNum
+	})
+
+	// get labels
+	const {
+		data: {labels, title, body}
+	} = response
+	core.debug(`processing issue ${issue.number}`)
+
+	// If it's a doc issue
+
+	const docLabelMatch = labels.find(label => {
+		label === 'documentation' ||
+			(typeof label === 'object' && label.name === 'documentation')
+	})
+	if (!docLabelMatch) {
+		core.debug(`doc issue: ${issue.number}`)
+		let doc_issue: IDocMD
+
+		// create file
+		const fullPath = path.join(`${title}.md`)
+		const dirName = path.dirname(fullPath)
+		fs.rmSync(dirName, {recursive: true, force: true})
+		mkdirp.sync(dirName)
+		fs.writeFileSync(fullPath, body || '0')
+		//TODO: to current repo instead of target repo
+		// octokit.rest.
+		return
+	}
+
+	// if it's a finding issue
+	let level
+	const levelLabelMatch = labels.find(label => {
+		// if label is a string
+		if ((Object.values(FindingLevel) as string[]).includes(label.toString())) {
+			level = label.toString()
+			return true
+		}
+
+		// if labels is an object
+		if (
+			typeof label === 'object' &&
+			(Object.values(FindingLevel) as string[]).includes(label.name!)
+		) {
+			level = label.name!
+			return true
+		}
+	})
+
+	let priority
+	const priorityLabel = labels.find(label => {
+		if (Number(label)) {
+			priority = Number(label)
+			return true
+		}
+		if (typeof label === 'object' && Number(label.name)) {
+			priority = Number(label.name!)
+			return true
+		}
+	})
+	const num = Number(priority)
+	if (!num) {
+		priority = 1
+	}
+	if (!levelLabelMatch) {
+		let fileName = `${issueNum}-${priority}-finding-${level}.md`
+		// finding_issues.push({
+		// 	fileName: `${
+		// 		issue.number
+		// 	}-${priority}-finding-${levelLabelMatch?.toString()!}`,
+		// 	level: levelLabelMatch?.toString()!,
+		// 	priority: 0,
+		// 	md: issue.body || ''
+		// })
+
+		core.info(`finding issue: ${fileName}`)
+		const fullPath = path.join(`${title}.md`)
+		const dirName = path.dirname(fullPath)
+		fs.rmSync(dirName, {recursive: true, force: true})
+		mkdirp.sync(dirName)
+		fs.writeFileSync(fullPath, body || '0')
+	}
+}
+
 export async function batch_processing_finding_issues(
 	configs: IConfigs
 ): Promise<IFindingMD[]> {

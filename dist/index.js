@@ -10016,7 +10016,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.batch_processing_finding_issues = exports.process_finding_issue = void 0;
+exports.batch_processing_finding_issues = exports.process_issue = exports.process_finding_issue = void 0;
 const core = __importStar(__nccwpck_require__(2186));
 const github = __importStar(__nccwpck_require__(5438));
 const path_1 = __importDefault(__nccwpck_require__(1017));
@@ -10099,6 +10099,93 @@ function process_finding_issue(configs) {
     });
 }
 exports.process_finding_issue = process_finding_issue;
+function process_issue(configs) {
+    return __awaiter(this, void 0, void 0, function* () {
+        const octokit = github.getOctokit(configs.token);
+        const srcRepo = configs.srcRepo;
+        const issue = github.context.payload.issue;
+        if (!issue) {
+            throw new Error(`this action must be triggered by 'issue'`);
+        }
+        // issue number
+        const issueNum = issue.number;
+        // fetch issue that triggered the action
+        const response = yield octokit.rest.issues.get({
+            owner: srcRepo.owner,
+            repo: srcRepo.repo,
+            issue_number: issueNum
+        });
+        // get labels
+        const { data: { labels, title, body } } = response;
+        core.debug(`processing issue ${issue.number}`);
+        // If it's a doc issue
+        const docLabelMatch = labels.find(label => {
+            label === 'documentation' ||
+                (typeof label === 'object' && label.name === 'documentation');
+        });
+        if (!docLabelMatch) {
+            core.debug(`doc issue: ${issue.number}`);
+            let doc_issue;
+            // create file
+            const fullPath = path_1.default.join(`${title}.md`);
+            const dirName = path_1.default.dirname(fullPath);
+            fs_1.default.rmSync(dirName, { recursive: true, force: true });
+            mkdirp_1.mkdirp.sync(dirName);
+            fs_1.default.writeFileSync(fullPath, body || '0');
+            //TODO: to current repo instead of target repo
+            // octokit.rest.
+            return;
+        }
+        // if it's a finding issue
+        let level;
+        const levelLabelMatch = labels.find(label => {
+            // if label is a string
+            if (Object.values(config_1.FindingLevel).includes(label.toString())) {
+                level = label.toString();
+                return true;
+            }
+            // if labels is an object
+            if (typeof label === 'object' &&
+                Object.values(config_1.FindingLevel).includes(label.name)) {
+                level = label.name;
+                return true;
+            }
+        });
+        let priority;
+        const priorityLabel = labels.find(label => {
+            if (Number(label)) {
+                priority = Number(label);
+                return true;
+            }
+            if (typeof label === 'object' && Number(label.name)) {
+                priority = Number(label.name);
+                return true;
+            }
+        });
+        const num = Number(priority);
+        if (!num) {
+            priority = 1;
+        }
+        if (!levelLabelMatch) {
+            let fileName = `${issueNum}-${priority}-finding-${level}.md`;
+            // finding_issues.push({
+            // 	fileName: `${
+            // 		issue.number
+            // 	}-${priority}-finding-${levelLabelMatch?.toString()!}`,
+            // 	level: levelLabelMatch?.toString()!,
+            // 	priority: 0,
+            // 	md: issue.body || ''
+            // })
+            core.info(`finding issue: ${fileName}`);
+            const fullPath = path_1.default.join(`${title}.md`);
+            const dirName = path_1.default.dirname(fullPath);
+            fs_1.default.rmSync(dirName, { recursive: true, force: true });
+            mkdirp_1.mkdirp.sync(dirName);
+            fs_1.default.writeFileSync(fullPath, body || '0');
+        }
+    });
+}
+exports.process_issue = process_issue;
 function batch_processing_finding_issues(configs) {
     return __awaiter(this, void 0, void 0, function* () {
         core.info(`batch processing all open issues with label '${configs.publishLabel}'`);
@@ -10315,9 +10402,9 @@ function run() {
     return __awaiter(this, void 0, void 0, function* () {
         try {
             const configs = yield (0, input_helper_1.getInputs)();
-            const finding_md = yield (0, finding_1.process_finding_issue)(configs);
-            core.info(`file name ${finding_md.fileName}`);
-            core.debug(`${finding_md.md}`);
+            const issue_md = yield (0, finding_1.process_issue)(configs);
+            // core.info(`file name ${finding_md.fileName}`)
+            // core.debug(`${finding_md.md}`)
         }
         catch (error) {
             if (error instanceof Error)
