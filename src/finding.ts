@@ -237,13 +237,24 @@ export async function batch_processing_finding_issues(
 		owner: configs.srcRepo.owner,
 		repo: configs.srcRepo.repo,
 		state: 'open',
-		labels: `${configs.publishLabel}` && `documentatiion`
+		labels: `documentatiion`
 	})
+	core.info(`${docs.data.length} doc issues`)
 	if (docs) {
 		for (const issue of docs.data) {
 			core.debug(`processing issue ${issue.number}`)
 
 			// If it's a doc issue
+			// check if it has publishlabel
+			const publishLabelMatch = issue.labels.find(
+				label =>
+					label === configs.publishLabel ||
+					(typeof label === 'object' && label.name === configs.publishLabel)
+			)
+
+			if (!publishLabelMatch) {
+				continue
+			}
 
 			const docLabelMatch = issue.labels.find(label => {
 				label === 'documentation' ||
