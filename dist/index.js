@@ -9968,7 +9968,7 @@ var FindingLevel;
     FindingLevel["High"] = "high";
     FindingLevel["Medium"] = "medium";
     FindingLevel["Low"] = "low";
-    FindingLevel["Info"] = "info";
+    FindingLevel["Info"] = "informational";
     FindingLevel["Undetermined"] = "undetermined";
 })(FindingLevel = exports.FindingLevel || (exports.FindingLevel = {}));
 
@@ -10316,6 +10316,9 @@ function batch_processing_finding_issues(configs) {
                 priority = 1;
             }
             if (levelLabelMatch) {
+                if (level === 'informational') {
+                    level = 'info';
+                }
                 const fileName = `${issue.number}-${priority}-finding-${level}.md`;
                 finding_issues.push({
                     fileName,

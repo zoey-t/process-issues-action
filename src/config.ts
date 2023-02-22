@@ -53,7 +53,7 @@ export enum FindingLevel {
 	High = 'high',
 	Medium = 'medium',
 	Low = 'low',
-	Info = 'info',
+	Info = 'informational',
 	Undetermined = 'undetermined'
 }
 

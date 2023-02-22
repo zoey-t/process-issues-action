@@ -335,6 +335,9 @@ function batch_processing_finding_issues(configs) {
                 priority = 1;
             }
             if (levelLabelMatch) {
+                if (level === 'informational') {
+                    level = 'info';
+                }
                 const fileName = `${issue.number}-${priority}-finding-${level}.md`;
                 finding_issues.push({
                     fileName,

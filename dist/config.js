@@ -6,6 +6,6 @@ var FindingLevel;
     FindingLevel["High"] = "high";
     FindingLevel["Medium"] = "medium";
     FindingLevel["Low"] = "low";
-    FindingLevel["Info"] = "info";
+    FindingLevel["Info"] = "informational";
     FindingLevel["Undetermined"] = "undetermined";
 })(FindingLevel = exports.FindingLevel || (exports.FindingLevel = {}));
