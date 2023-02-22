@@ -367,6 +367,9 @@ export async function batch_processing_finding_issues(
 			priority = 1
 		}
 		if (levelLabelMatch) {
+			if (level === 'informational') {
+				level = 'info'
+			}
 			const fileName = `${issue.number}-${priority}-finding-${level}.md`
 			finding_issues.push({
 				fileName,
